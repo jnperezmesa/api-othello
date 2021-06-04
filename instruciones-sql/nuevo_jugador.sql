@@ -1,0 +1,1 @@
+INSERT INTO jugadores (id_jugador, fecha_creacion) VALUES ( 'id', datetime('now'))

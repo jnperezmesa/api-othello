@@ -1,0 +1,1 @@
+UPDATE partidas SET estado = 'estado de la partida' WHERE id_partida = 'id_partida';

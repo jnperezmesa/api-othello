@@ -1,0 +1,1 @@
+UPDATE partidas SET tablero = 'json del tablero', turno = sum((SELECT turno FROM partidas WHERE id_partida = 'id_partida') + 1), juega = 'color de ficha', fecha_ultima_actualizacion = datetime('now')  WHERE id_partida = 'id_partida';
