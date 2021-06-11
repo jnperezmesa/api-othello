@@ -1,0 +1,1 @@
+select count(id_jugador) AS existe from jugadores WHERE id_jugador = 'local';

@@ -1,0 +1,1 @@
+C:37:"PHPUnit\Runner\DefaultTestResultCache":256:{a:2:{s:7:"defects";a:3:{s:29:"crearUsuarioTest::test0Puntos";i:4;s:7:"Warning";i:6;s:29:"CrearUsuarioTest::testCrearId";i:3;}s:5:"times";a:3:{s:29:"crearUsuarioTest::test0Puntos";d:0.004;s:7:"Warning";d:0.001;s:29:"CrearUsuarioTest::testCrearId";d:0.001;}}}
