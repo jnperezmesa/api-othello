@@ -1,49 +1,89 @@
 from sqlalchemy.orm import Session
-from . import models, schemas
+from . import models, schemas, tools
 
 
-#--------------------------------------------------------------------------------------------
-# Jugadores
-#--------------------------------------------------------------------------------------------
-def buscar_jugador(db: Session, id_jugador: int):
+def buscar_jugador(db: Session, id_jugador):
     """ Función que busca a un jugador por su id """
     # Filtramos la base de datos en busca de una coincidencia
     return db.query(models.Jugador).filter(models.Jugador.id_jugador == id_jugador).first()
 
 
-def registrar_jugador(db: Session, jugador: schemas.UserCreate):
-    # Creo el id del jugador
-    id_jugador = jugador.password + "notreallyhashed"
-    if db.query(models.Jugador).filter(models.Jugador.id_jugador == id_jugador) > 0:
-        # Relleno la ficha del jugador
-        db_jugador = models.Jugador(
-            id_jugador=id_jugador,
-        )
-        # Agrego la ficha del jugador a la base de datos
-        db.add(db_jugador)
-        # Guardo los cambios en la base de datos
-        db.commit()
-        # Actualizo los cambios en la base de datos
-        db.refresh(db_jugador)
-        # Deuelvo el id del jugador
-        return db_jugador.id_jugador
-    else:
-        registrar_jugador(db, jugador)
-
-
-
-#--------------------------------------------------------------------------------------------
-# Partidas
-#--------------------------------------------------------------------------------------------
-def buscar_partida(db: Session, id_partida: int):
+def buscar_partida(db: Session, id_partida):
     """ Funcion que busca una partida por su id """
     # Filtramos la base de datos en busca de una coincidencia
     return db.query(models.Partida).filter(models.Partida.id_partida == id_partida).first()
 
 
-def create_user_item(db: Session, item: schemas.ItemCreate, user_id: int):
-    db_item = models.Item(**item.dict(), owner_id=user_id)
-    db.add(db_item)
+def registrar_jugador(db: Session):
+    """ Función que registra a un jugador """
+    # Creo el id del jugador
+    id_jugador = tools.generar_id(caracteres=7)
+    # Relleno la ficha del jugador
+    db_jugador = models.Jugador(
+        id_jugador=id_jugador,
+    )
+    # Agrego la ficha del jugador a la base de datos
+    jugador = tools.guardar_datos(db=db, registro=db_jugador)
+    # Devuelvo el id del jugador
+    return jugador.id_jugador
+
+
+def registrar_partida(db: Session, peticion: schemas.CrearPartida):
+    """ Función que registra una partida """
+    # Creo el id de la partida
+    id = tools.generar_id()
+    # Relleno la ficha de la partida
+    db_partida = models.Partida(
+        id_partida=id,
+        id_jugador_1=peticion.id_jugador,
+        tipo_de_partida=peticion.tipo_de_partida,
+    )
+    # Guardo los cambios y devuelvo el resultado
+    partida = tools.guardar_datos(db=db, registro=db_partida)
+    return partida
+
+def actualizar_jugador_2(db: Session, peticion: schemas.UnirseAPartida):
+    """ Función que agrega al jugador 2 a la partida"""
+    pass
+
+
+def actualizar_jugador(db: Session, id_jugador, fecha):
+    """ Función que actualiza los datos del jugador """
+    # Actualizo la fecha y hora de la última partida del jugador
+    db_jugador = db.query(models.Partida).filter(models.Partida.id_jugador == id_jugador).update(
+        {
+            "fecha_ultima_partida": fecha
+        }
+    )
+    # Guardo los datos
     db.commit()
-    db.refresh(db_item)
-    return db_item
+    # Refresco la sesión
+    db.refresh(db_jugador)
+    # Compruebo si se han hecho los cambios
+    if buscar_jugador(db, id_jugador=id_jugador).fecha_ultima_partida == fecha:
+        return True
+    else:
+        return False
+
+
+def actualizar_partida(db: Session, partida: schemas.ActualizarPartida):
+    """ Función que actualiza el estado de la partida """
+    # Actualizo la fecha y hora de la última partida del jugador
+    fecha = datetime.datetime.utcnow
+    db_partida = db.query(models.Partida).filter(models.Partida.id_partida == partida.id_partida).update(
+        {
+            "turno": tools.nuevo_turno(turno_actual=models.Partida.turno),
+            "juega": partida.juega,
+            "tablero": partida.tablero,
+            "fecha_ultima_actualizacion": fecha,
+        }
+    )
+    # Guardo los datos
+    db.commit()
+    # Refresco la sesión
+    db.refresh(db_partida)
+    # Compruebo que se han guardado los cambios
+    if buscar_partida(db, id_partida=partida.id_partida).fecha_ultima_actualizacion == fecha:
+        return db_partida
+    else:
+        return False

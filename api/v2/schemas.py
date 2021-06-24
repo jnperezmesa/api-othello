@@ -1,43 +1,45 @@
-# Dependencias
 from typing import List, Optional
 from pydantic import BaseModel
+from . import options
 
 
-# Jugador
-class JugadorBase(BaseModel):
+class Jugador(BaseModel):
+    """ Modelo para pedir el jugador """
     id_jugador: str
 
 
-class UserCreate(UserBase):
-    password: str
+class Partida(BaseModel):
+    """ Modelo para pedir la partida """
+    id_partida: str
 
 
-
-class User(UserBase):
-    id: int
-    is_active: bool
-    items: List[Item] = []
-
-    class Config:
-        orm_mode = True
+class CrearPartida(BaseModel):
+    """ Modelo para crear la partida """
+    tipo_de_partida: int
+    id_jugador: str
 
 
-# Partida
-class PartidaBase(BaseModel):
-    title: str
-    description: Optional[str] = None
+class UnirseAPartida(BaseModel):
+    """ Modelo para unirse a la partida """
+    id_partida: str
+    id_jugador: str
 
 
+class ActualizarPartida(BaseModel):
+    """ Modelo para actualizar el tablero desde la aplicación o el servidor """
+    id_partida: str
+    turno: int
+    juega: options.Juega
+    tablero: str
 
 
-class ItemCreate(ItemBase):
-    pass
-
-
-
-class Item(ItemBase):
-    id: int
-    owner_id: int
-
-    class Config:
-        orm_mode = True
+class ColocarFicha(BaseModel):
+    """ Modelo para calcular el juego desde el servidor """
+    id_partida: str
+    id_jugador: str
+    turno: int
+    pos_x: int
+    pos_y: int
+    ficha: int
+    juega: options.Juega
+    tablero: str
