@@ -27,6 +27,11 @@ Nota: si queremos desactivarlo usamos el siguiente comando:
 pip3 install fastapi
  ````
 
+4. Instalamos el gestor de la base de datos
+```` 
+pip3 install sqlalchemy
+```` 
+
 4. Instalamos el servidor.
 ```` 
 pip3 install uvicorn
@@ -36,3 +41,5 @@ pip3 install uvicorn
 ```` 
 uvicorn v2.main:app --reload
  ````
+
+Ver y probar los tipos de peticiones: http://127.0.0.1:8000/docs#/default

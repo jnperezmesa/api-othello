@@ -18,7 +18,6 @@ class CrearPartida(BaseModel):
     tipo_de_partida: int
     id_jugador: str
 
-
 class UnirseAPartida(BaseModel):
     """ Modelo para unirse a la partida """
     id_partida: str
