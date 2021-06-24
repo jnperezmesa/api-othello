@@ -27,29 +27,52 @@ URL_BASE_PARTIDA = "/api/v2/partida/"
 
 
 """ ENDPOINTS """
-@app.get(str(f"{URL_BASE_PARTIDA}" + "{id_partida}"))
+@app.get(str(f"{URL_BASE_PARTIDA}" + "{id_partida}"), response_model=schemas.VerPartida)
 def ver_partida(id_partida, db: Session = Depends(get_db)):
     """ Comprobar el estado de la partida """
+    # Buscamos la partida
     partida = crud.buscar_partida(db=db, id_partida=id_partida)
+    # Comprobamos si hemos recuperado la partida
     if partida is None:
         raise HTTPException(status_code=404, detail="Partida no encontrada")
     else:
-        return partida
+        # Nos aseguramos de que es la partida correcta
+        if id_partida == partida.id_partida:
+            # Preparamos la respuesta
+            respuesta = {
+                "estado": partida.estado,
+                "turno": partida.turno,
+                "juega": partida.juega,
+                "tablero": partida.tablero,
+            }
+            # Entregamos la respuesta
+            return respuesta
+        else:
+            raise HTTPException(status_code=404, detail="Partida incorrecta")
 
 
-@app.post(f"{URL_BASE_JUGADOR}nuevo/", response_model=schemas.Jugador)
+@app.post(f"{URL_BASE_JUGADOR}crear/", response_model=schemas.Jugador)
 def crear_jugador(db: Session = Depends(get_db)):
     """ Crear un nuevo jugador y devolver el id """
-    jugador = schemas.Jugador
-    jugador.id_jugador = crud.registrar_jugador(db=db)
-    return jugador
+    nuevo = crud.registrar_jugador(db=db)
+    respuesta = schemas.Jugador(
+        id_jugador=nuevo.id_jugador
+    )
+    return respuesta
 
 
-@app.post(f"{URL_BASE_PARTIDA}crear/", response_model=schemas.Partida)
-def crear_partida(crear: schemas.CrearPartida, db: Session = Depends(get_db)):
+@app.post((f"{URL_BASE_PARTIDA}crear/" + "{id_jugador}/{tipo_de_partida}/"), response_model=schemas.Partida)
+def crear_partida(id_jugador, tipo_de_partida, db: Session = Depends(get_db)):
     """ Crear una nueva partida y devolver el id """
-    partida = crud.registrar_partida(db=db, peticion=crear)
-    return partida
+    crear = schemas.CrearPartida(
+        id_jugador=id_jugador,
+        tipo_de_partida=tipo_de_partida
+    )
+    nueva = crud.registrar_partida(db=db, peticion=crear)
+    respuesta = {
+        "id_partida": nueva.id_partida
+    }
+    return respuesta
 
 
 @app.put(str(f"{URL_BASE_PARTIDA}unirse/" + "{id_partida}/{id_jugador}/"), response_model=schemas.ActualizarPartida)

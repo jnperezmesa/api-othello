@@ -13,10 +13,19 @@ class Partida(BaseModel):
     id_partida: str
 
 
+class VerPartida(BaseModel):
+    """ Modelo para ver el estado de la partida """
+    estado: int
+    turno: int
+    juega: int
+    tablero: Optional[str] = None
+
+
 class CrearPartida(BaseModel):
     """ Modelo para crear la partida """
     tipo_de_partida: int
     id_jugador: str
+
 
 class UnirseAPartida(BaseModel):
     """ Modelo para unirse a la partida """
@@ -27,6 +36,8 @@ class UnirseAPartida(BaseModel):
 class ActualizarPartida(BaseModel):
     """ Modelo para actualizar el tablero desde la aplicación o el servidor """
     id_partida: str
+    id_jugador: str
+    estado: options.Estado
     turno: int
     juega: options.Juega
     tablero: str

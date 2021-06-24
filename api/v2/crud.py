@@ -25,7 +25,7 @@ def registrar_jugador(db: Session):
     # Agrego la ficha del jugador a la base de datos
     jugador = tools.guardar_datos(db=db, registro=db_jugador)
     # Devuelvo el id del jugador
-    return jugador.id_jugador
+    return jugador
 
 
 def registrar_partida(db: Session, peticion: schemas.CrearPartida):
