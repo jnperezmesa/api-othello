@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from . import options
 
 
+""" Modelos para ver """
+
 class Jugador(BaseModel):
     """ Modelo para pedir el jugador """
     id_jugador: str
@@ -13,14 +15,21 @@ class Partida(BaseModel):
     id_partida: str
 
 
-class VerPartida(BaseModel):
+class EstadoPartida(BaseModel):
     """ Modelo para ver el estado de la partida """
     estado: int
     turno: int
     juega: int
+    victoria: Optional[int] = None
+    ficha_jugador_1: int
+    capturas_jugador_1: int
+    ficha_jugador_2: int
+    capturas_jugador_2: int
     tablero: Optional[str] = None
     fecha_ultima_actualizacion: str
 
+
+""" Modelos para modificar """
 
 class CrearPartida(BaseModel):
     """ Modelo para crear la partida """
@@ -34,23 +43,12 @@ class UnirseAPartida(BaseModel):
     id_jugador: str
 
 
-class ActualizarPartida(BaseModel):
-    """ Modelo para actualizar el tablero desde la aplicación o el servidor """
-    id_partida: str
-    id_jugador: str
-    estado: options.Estado
-    turno: int
-    juega: options.Juega
-    tablero: str
-
-
 class ColocarFicha(BaseModel):
     """ Modelo para calcular el juego desde el servidor """
-    id_partida: str
-    id_jugador: str
     turno: int
     pos_x: int
     pos_y: int
     ficha: int
     juega: options.Juega
     tablero: str
+    fecha_ultima_actualizacion: str

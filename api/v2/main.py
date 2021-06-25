@@ -27,78 +27,119 @@ URL_BASE_PARTIDA = "/api/v2/partida/"
 
 
 """ ENDPOINTS """
-@app.get(str(f"{URL_BASE_PARTIDA}" + "{id_partida}"), response_model=schemas.VerPartida)
+@app.get(str(f"{URL_BASE_PARTIDA}" + "{id_partida}"), response_model=schemas.EstadoPartida)
 def ver_partida(id_partida, db: Session = Depends(get_db)):
     """ Comprobar el estado de la partida """
     # Buscamos la partida
     partida = crud.buscar_partida(db=db, id_partida=id_partida)
     # Comprobamos si hemos recuperado la partida
     if partida is None:
-        raise HTTPException(status_code=404, detail="Partida no encontrada")
+        raise HTTPException(status_code=404, detail="La partida no existe")
     else:
         # Nos aseguramos de que es la partida correcta
         if id_partida == partida.id_partida:
             # Preparamos la respuesta
-            respuesta = schemas.VerPartida(
+            respuesta = schemas.EstadoPartida(
                 estado=partida.estado,
                 turno=partida.turno,
                 juega=partida.juega,
+                victoria=partida.victoria,
+                ficha_jugador_1=partida.ficha_jugador_1,
+                capturas_jugador_1=partida.capturas_jugador_1,
+                ficha_jugador_2=partida.ficha_jugador_2,
+                capturas_jugador_2=partida.capturas_jugador_2,
                 tablero=partida.tablero,
                 fecha_ultima_actualizacion=partida.fecha_ultima_actualizacion,
             )
             # Entregamos la respuesta
             return respuesta
         else:
-            raise HTTPException(status_code=404, detail="Partida incorrecta")
+            raise HTTPException(status_code=403, detail="El codigo no ha llegado bien")
 
 
-@app.post(f"{URL_BASE_JUGADOR}crear/", response_model=schemas.Jugador)
+@app.post(f"{URL_BASE_JUGADOR}crear/", response_model=schemas.Jugador, status_code=201)
 def crear_jugador(db: Session = Depends(get_db)):
     """ Crear un nuevo jugador y devolver el id """
+    # Registramos al nuevo jugador
     nuevo = crud.registrar_jugador(db=db)
+    # Cargamos la respuesta
     respuesta = schemas.Jugador(
         id_jugador=nuevo.id_jugador
     )
     return respuesta
 
 
-@app.post((f"{URL_BASE_PARTIDA}crear/" + "{id_jugador}/{tipo_de_partida}/"), response_model=schemas.Partida)
+@app.post((f"{URL_BASE_PARTIDA}crear/" + "{tipo_de_partida}/{id_jugador}/"), response_model=schemas.Partida, status_code=201)
 def crear_partida(id_jugador, tipo_de_partida, db: Session = Depends(get_db)):
     """ Crear una nueva partida y devolver el id """
-    crear = schemas.CrearPartida(
-        id_jugador=id_jugador,
-        tipo_de_partida=tipo_de_partida
-    )
-    nueva = crud.registrar_partida(db=db, datos=crear)
-    respuesta = schemas.Partida(
-        id_partida=nueva.id_partida,
-    )
-    return respuesta
+    # Compruebo que es un jugador registrado
+    if crud.buscar_jugador(db=db, id_jugador=id_jugador):
+        # Preparamos los datos
+        crear = schemas.CrearPartida(
+            id_jugador=id_jugador,
+            tipo_de_partida=tipo_de_partida
+        )
+        # Registramos la partida
+        nueva = crud.registrar_partida(db=db, datos=crear)
+        # Cargamos la respuesta
+        respuesta = schemas.Partida(
+            id_partida=nueva.id_partida,
+        )
+        return respuesta
+    else:
+        raise HTTPException(status_code=403, detail="No estás registrado")
 
 
-@app.put(str(f"{URL_BASE_PARTIDA}unirse/" + "{id_partida}/{id_jugador}/"), response_model=schemas.VerPartida)
+@app.put(str(f"{URL_BASE_PARTIDA}unirse/" + "{id_partida}/{id_jugador}/"), response_model=schemas.EstadoPartida, status_code=202)
 def unirse_a_partida(id_partida, id_jugador, db: Session = Depends(get_db)):
     """ Unirse a una partida """
     # Busca la partida
     partida = crud.buscar_partida(db, id_partida)
+    # Peparamos los datos
     datos = schemas.UnirseAPartida(
         id_partida=id_partida,
         id_jugador=id_jugador,
     )
+    # Verificamos que el id es correcto
     if partida.id_partida == id_partida:
+        # Comprobamos el estado de la partida
         if partida.estado == options.Estado.espera:
+            # Si está en espera, guardamos los datos del nuevo jugador
             partida_actualizada = crud.registrar_jugador_2(db=db, datos=datos)
-            respuesta = schemas.VerPartida(
+            # Cargamos el nuevo estado de la partida
+            respuesta = schemas.EstadoPartida(
                 estado=partida_actualizada.estado,
                 turno=partida_actualizada.turno,
                 juega=partida_actualizada.juega,
+                victoria=partida_actualizada.victoria,
+                ficha_jugador_1=partida_actualizada.ficha_jugador_1,
+                capturas_jugador_1=partida_actualizada.capturas_jugador_1,
+                ficha_jugador_2=partida_actualizada.ficha_jugador_2,
+                capturas_jugador_2=partida_actualizada.capturas_jugador_2,
                 tablero=partida_actualizada.tablero,
                 fecha_ultima_actualizacion=partida_actualizada.fecha_ultima_actualizacion,
             )
             return respuesta
         elif partida.estado == options.Estado.activa:
-            raise HTTPException(status_code=400, detail="La partida está en curso")
+            raise HTTPException(status_code=403, detail="Has llegado tarde, la partida ya ha empezado")
         elif partida.estado == options.Estado.cerrada:
-            raise HTTPException(status_code=400, detail="La partida ha terminado")
+            raise HTTPException(status_code=403, detail="Has llegado muy tarde, la partida ha terminado")
     else:
-        raise HTTPException(status_code=404, detail="Código de partida incorrecto")
+        raise HTTPException(status_code=404, detail="Te has equivocado de codigo")
+
+
+@app.put(str(f"{URL_BASE_PARTIDA}jugar/" + "{id_partida}/{id_jugador}/"), response_model=schemas.EstadoPartida, status_code=202)
+def jugar_turno(id_partida, id_jugador, movimiento: schemas.EstadoPartida, db: Session = Depends(get_db)):
+    """ Unirse a una partida """
+    # Busca la partida
+    partida = crud.buscar_partida(db, id_partida)
+    if partida.id_partida == id_partida:
+        # Busca comprueba que el jugador es valido
+        if partida.id_jugador_1 == id_jugador or partida.id_jugador_2 == id_jugador:
+            pass
+        elif crud.buscar_jugador(db=db, id_jugador=id_jugador):
+            raise HTTPException(status_code=403, detail="No juegas en esta partida")
+        else:
+            raise HTTPException(status_code=404, detail="No estás registrado")
+    else:
+        raise HTTPException(status_code=404, detail="Te has equivocado de codigo")

@@ -59,57 +59,63 @@ def registrar_jugador_2(db: Session, datos: schemas.UnirseAPartida):
     """ Función que agrega al jugador 2 a la partida"""
     # Marco el tiempo
     fecha = datetime.now()
-    # Filtro y modifico
-    db.query(models.Partida).filter(models.Partida.id_partida == datos.id_partida).update(
-        {
-            "id_jugador_2": datos.id_jugador,
-            "estado": options.Estado.activa,
-            "fecha_ultima_actualizacion": fecha,
-        }
-    )
-    # Guardo los datos
-    db.commit()
+    # Actualizo la fecha de ultima partida del jugador y autorizo el paso a actualizar la partida
+    if actualizar_jugador(db=db, id_jugador=datos.id_jugador, fecha=fecha):
+        # Filtro y modifico
+        db.query(models.Partida).filter(models.Partida.id_partida == datos.id_partida).update(
+            {
+                "id_jugador_2": datos.id_jugador,
+                "estado": options.Estado.activa,
+                "fecha_ultima_actualizacion": fecha,
+            }
+        )
+        # Guardo los datos
+        db.commit()
     # Entrego los datos de la partida actualizados
     return buscar_partida(db=db, id_partida=datos.id_partida)
 
 
 def actualizar_jugador(db: Session, id_jugador, fecha):
     """ Función que actualiza los datos del jugador """
-    # Actualizo la fecha y hora de la última partida del jugador
-    db_jugador = db.query(models.Jugador).filter(models.Jugador.id_jugador == id_jugador).update(
+    # Filtro y modifico
+    db.query(models.Jugador).filter(models.Jugador.id_jugador == id_jugador).update(
         {
             "fecha_ultima_partida": fecha
         }
     )
     # Guardo los datos
     db.commit()
-    # Refresco la sesión
-    db.refresh(db_jugador)
     # Compruebo si se han hecho los cambios
-    if buscar_jugador(db, id_jugador=id_jugador).fecha_ultima_partida == fecha:
+    jugador = buscar_jugador(db, id_jugador=id_jugador)
+    # Entrego true si se ha actualizado correctamente
+    if jugador.fecha_ultima_partida == str(fecha):
         return True
+    # Entrego false si no se ha actualizado correctamente
     else:
         return False
 
 
-def actualizar_partida(db: Session, partida: schemas.ActualizarPartida):
+def actualizar_partida(db: Session, partida: schemas.EstadoPartida):
     """ Función que actualiza el estado de la partida """
     # Actualizo la fecha y hora de la última partida del jugador
     fecha = datetime.datetime.utcnow
-    db_partida = db.query(models.Partida).filter(models.Partida.id_partida == partida.id_partida).update(
+    db.query(models.Partida).filter(models.Partida.id_partida == partida.id_partida).update(
         {
+            "estado": partida.estado,
             "turno": tools.nuevo_turno(turno_actual=models.Partida.turno),
             "juega": partida.juega,
+            "victoria": partida.victoria,
+            "ficha_jugador_1": partida.juega,
+            "ficha_jugador_2": partida.juega,
             "tablero": partida.tablero,
             "fecha_ultima_actualizacion": fecha,
         }
     )
     # Guardo los datos
     db.commit()
-    # Refresco la sesión
-    db.refresh(db_partida)
+    partida_actualizada = buscar_partida(db, id_partida=partida.id_partida)
     # Compruebo que se han guardado los cambios
-    if buscar_partida(db, id_partida=partida.id_partida).fecha_ultima_actualizacion == fecha:
+    if partida_actualizada.fecha_ultima_actualizacion == fecha:
         return db_partida
     else:
         return False

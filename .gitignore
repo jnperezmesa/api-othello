@@ -946,3 +946,4 @@ api/v2/__pycache__/database.cpython-38.pyc
 api/v2/__pycache__/crud.cpython-38.pyc
 api/v2/__pycache__/__init__.cpython-38.pyc
 api/othello.sqlite
+api/othello.sqlite
