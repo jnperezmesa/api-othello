@@ -19,6 +19,7 @@ class VerPartida(BaseModel):
     turno: int
     juega: int
     tablero: Optional[str] = None
+    fecha_ultima_actualizacion: str
 
 
 class CrearPartida(BaseModel):

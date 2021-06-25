@@ -39,12 +39,13 @@ def ver_partida(id_partida, db: Session = Depends(get_db)):
         # Nos aseguramos de que es la partida correcta
         if id_partida == partida.id_partida:
             # Preparamos la respuesta
-            respuesta = {
-                "estado": partida.estado,
-                "turno": partida.turno,
-                "juega": partida.juega,
-                "tablero": partida.tablero,
-            }
+            respuesta = schemas.VerPartida(
+                estado=partida.estado,
+                turno=partida.turno,
+                juega=partida.juega,
+                tablero=partida.tablero,
+                fecha_ultima_actualizacion=partida.fecha_ultima_actualizacion,
+            )
             # Entregamos la respuesta
             return respuesta
         else:
@@ -68,26 +69,36 @@ def crear_partida(id_jugador, tipo_de_partida, db: Session = Depends(get_db)):
         id_jugador=id_jugador,
         tipo_de_partida=tipo_de_partida
     )
-    nueva = crud.registrar_partida(db=db, peticion=crear)
-    respuesta = {
-        "id_partida": nueva.id_partida
-    }
+    nueva = crud.registrar_partida(db=db, datos=crear)
+    respuesta = schemas.Partida(
+        id_partida=nueva.id_partida,
+    )
     return respuesta
 
 
-@app.put(str(f"{URL_BASE_PARTIDA}unirse/" + "{id_partida}/{id_jugador}/"), response_model=schemas.ActualizarPartida)
+@app.put(str(f"{URL_BASE_PARTIDA}unirse/" + "{id_partida}/{id_jugador}/"), response_model=schemas.VerPartida)
 def unirse_a_partida(id_partida, id_jugador, db: Session = Depends(get_db)):
     """ Unirse a una partida """
     # Busca la partida
-    partida = crud.buscar_partida(db, nuevo_jugador.id_partida)
-    if partida.id_partida == nuevo_jugador.id_partida:
+    partida = crud.buscar_partida(db, id_partida)
+    datos = schemas.UnirseAPartida(
+        id_partida=id_partida,
+        id_jugador=id_jugador,
+    )
+    if partida.id_partida == id_partida:
         if partida.estado == options.Estado.espera:
-            crud.actualizar_partida(db=db, partida=partida)
-            crud.actualizar_jugador(db=db, )
-            return partida
+            partida_actualizada = crud.registrar_jugador_2(db=db, datos=datos)
+            respuesta = schemas.VerPartida(
+                estado=partida_actualizada.estado,
+                turno=partida_actualizada.turno,
+                juega=partida_actualizada.juega,
+                tablero=partida_actualizada.tablero,
+                fecha_ultima_actualizacion=partida_actualizada.fecha_ultima_actualizacion,
+            )
+            return respuesta
         elif partida.estado == options.Estado.activa:
             raise HTTPException(status_code=400, detail="La partida está en curso")
         elif partida.estado == options.Estado.cerrada:
             raise HTTPException(status_code=400, detail="La partida ha terminado")
     else:
-        raise HTTPException(status_code=404, detail="Partida no encontrada")
+        raise HTTPException(status_code=404, detail="Código de partida incorrecto")

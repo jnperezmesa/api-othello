@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
-from . import models, schemas, tools
+from . import models, schemas, tools, options
+from datetime import datetime
 
 
 def buscar_jugador(db: Session, id_jugador):
@@ -28,29 +29,54 @@ def registrar_jugador(db: Session):
     return jugador
 
 
-def registrar_partida(db: Session, peticion: schemas.CrearPartida):
+def registrar_partida(db: Session, datos: schemas.CrearPartida):
     """ Función que registra una partida """
     # Creo el id de la partida
     id = tools.generar_id()
     # Relleno la ficha de la partida
     db_partida = models.Partida(
         id_partida=id,
-        id_jugador_1=peticion.id_jugador,
-        tipo_de_partida=peticion.tipo_de_partida,
+        id_jugador_1=datos.id_jugador,
+        tipo_de_partida=datos.tipo_de_partida,
     )
-    # Guardo los cambios y devuelvo el resultado
+    # Si la partida no es online, cargo el jugador 2 y paso a activa
+    if datos.tipo_de_partida == options.Tipo.local or datos.tipo_de_partida == options.Tipo.boot:
+        # Agrego que es jugador local
+        if datos.tipo_de_partida == options.Tipo.local:
+            db_partida.id_jugador_2 = 'local'
+        # Agrego que es jugador boot
+        elif datos.tipo_de_partida == options.Tipo.boot:
+            db_partida.id_jugador_2 = 'boot'
+        # Cambio el estado de la partida
+        db_partida.estado = options.Estado.activa
+    # Guardo los cambios
     partida = tools.guardar_datos(db=db, registro=db_partida)
+    # devuelvo el resultado
     return partida
 
-def actualizar_jugador_2(db: Session, peticion: schemas.UnirseAPartida):
+
+def registrar_jugador_2(db: Session, datos: schemas.UnirseAPartida):
     """ Función que agrega al jugador 2 a la partida"""
-    pass
+    # Marco el tiempo
+    fecha = datetime.now()
+    # Filtro y modifico
+    db.query(models.Partida).filter(models.Partida.id_partida == datos.id_partida).update(
+        {
+            "id_jugador_2": datos.id_jugador,
+            "estado": options.Estado.activa,
+            "fecha_ultima_actualizacion": fecha,
+        }
+    )
+    # Guardo los datos
+    db.commit()
+    # Entrego los datos de la partida actualizados
+    return buscar_partida(db=db, id_partida=datos.id_partida)
 
 
 def actualizar_jugador(db: Session, id_jugador, fecha):
     """ Función que actualiza los datos del jugador """
     # Actualizo la fecha y hora de la última partida del jugador
-    db_jugador = db.query(models.Partida).filter(models.Partida.id_jugador == id_jugador).update(
+    db_jugador = db.query(models.Jugador).filter(models.Jugador.id_jugador == id_jugador).update(
         {
             "fecha_ultima_partida": fecha
         }
