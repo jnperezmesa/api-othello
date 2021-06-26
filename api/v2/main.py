@@ -29,7 +29,7 @@ URL_BASE_PARTIDA = "/api/v2/partida/"
 """ ENDPOINTS """
 @app.get(str(f"{URL_BASE_PARTIDA}" + "{id_partida}"), response_model=schemas.EstadoPartida)
 def ver_partida(id_partida, db: Session = Depends(get_db)):
-    """ Comprobar el estado de la partida """
+    """ Comprobar el estado de la partida o ver como espectador """
     # Buscamos la partida
     partida = crud.buscar_partida(db=db, id_partida=id_partida)
     # Comprobamos si hemos recuperado la partida
@@ -92,7 +92,7 @@ def crear_partida(id_jugador, tipo_de_partida, db: Session = Depends(get_db)):
 
 @app.put(str(f"{URL_BASE_PARTIDA}unirse/" + "{id_partida}/{id_jugador}/"), response_model=schemas.EstadoPartida, status_code=202)
 def unirse_a_partida(id_partida, id_jugador, db: Session = Depends(get_db)):
-    """ Unirse a una partida """
+    """ Unirse a una partida existente y devolver el estado de la partida """
     # Busca la partida
     partida = crud.buscar_partida(db, id_partida)
     # Peparamos los datos
@@ -130,13 +130,34 @@ def unirse_a_partida(id_partida, id_jugador, db: Session = Depends(get_db)):
 
 @app.put(str(f"{URL_BASE_PARTIDA}jugar/" + "{id_partida}/{id_jugador}/"), response_model=schemas.EstadoPartida, status_code=202)
 def jugar_turno(id_partida, id_jugador, movimiento: schemas.EstadoPartida, db: Session = Depends(get_db)):
-    """ Unirse a una partida """
+    """ Jugar el turno enviando los datos desde la app y recibir el nuevo estado de la partida """
     # Busca la partida
     partida = crud.buscar_partida(db, id_partida)
     if partida.id_partida == id_partida:
         # Busca comprueba que el jugador es valido
         if partida.id_jugador_1 == id_jugador or partida.id_jugador_2 == id_jugador:
-            pass
+            # Compruebo que la partida está activa
+            if partida.estado == options.Estado.activa:
+                # Actualizamos el estado de la partida
+                partida_actualizada = crud.actualizar_partida(db=db, id_jugador=id_jugador, id_partida=id_partida,
+                                                              partida=movimiento)
+                # Cargamos la respuesta con el nuevo estado de la partida
+                respuesta = schemas.EstadoPartida(
+                    estado=partida_actualizada.estado,
+                    turno=partida_actualizada.turno,
+                    juega=partida_actualizada.juega,
+                    victoria=partida_actualizada.victoria,
+                    ficha_jugador_1=partida_actualizada.ficha_jugador_1,
+                    capturas_jugador_1=partida_actualizada.capturas_jugador_1,
+                    ficha_jugador_2=partida_actualizada.ficha_jugador_2,
+                    capturas_jugador_2=partida_actualizada.capturas_jugador_2,
+                    tablero=partida_actualizada.tablero,
+                    fecha_ultima_actualizacion=partida_actualizada.fecha_ultima_actualizacion,
+                )
+                return respuesta
+            # Si no está activa le entrego la partida acabada
+            else:
+                return partida
         elif crud.buscar_jugador(db=db, id_jugador=id_jugador):
             raise HTTPException(status_code=403, detail="No juegas en esta partida")
         else:

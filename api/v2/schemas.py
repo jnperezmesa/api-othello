@@ -6,17 +6,17 @@ from . import options
 """ Modelos para ver """
 
 class Jugador(BaseModel):
-    """ Modelo para pedir el jugador """
+    """ Dato que recibiremos cuando solicitemos crear un nuevo jugador """
     id_jugador: str
 
 
 class Partida(BaseModel):
-    """ Modelo para pedir la partida """
+    """ Dato que recibiremos cuando solicitemos crear una partida """
     id_partida: str
 
 
 class EstadoPartida(BaseModel):
-    """ Modelo para ver el estado de la partida """
+    """ Datos que recibimos cuando pedimos ver una partida o cuando efecutamos un cambio a raiz de un cambio de turno """
     estado: int
     turno: int
     juega: int
@@ -26,25 +26,25 @@ class EstadoPartida(BaseModel):
     ficha_jugador_2: int
     capturas_jugador_2: int
     tablero: Optional[str] = None
-    fecha_ultima_actualizacion: str
+    fecha_ultima_actualizacion: Optional[str] = None
 
 
 """ Modelos para modificar """
 
 class CrearPartida(BaseModel):
-    """ Modelo para crear la partida """
+    """ Datos necesarios para crear una nueva partida """
     tipo_de_partida: int
     id_jugador: str
 
 
 class UnirseAPartida(BaseModel):
-    """ Modelo para unirse a la partida """
+    """ Datos necesarios para unirse a una partida existente """
     id_partida: str
     id_jugador: str
 
 
 class ColocarFicha(BaseModel):
-    """ Modelo para calcular el juego desde el servidor """
+    """ Datos necesarios para que el servidor calcule la jugada """
     turno: int
     pos_x: int
     pos_y: int

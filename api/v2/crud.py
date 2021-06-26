@@ -18,7 +18,7 @@ def buscar_partida(db: Session, id_partida):
 def registrar_jugador(db: Session):
     """ Función que registra a un jugador """
     # Creo el id del jugador
-    id_jugador = tools.generar_id(caracteres=7)
+    id_jugador = tools.generar_id(caracteres=14)
     # Relleno la ficha del jugador
     db_jugador = models.Jugador(
         id_jugador=id_jugador,
@@ -95,27 +95,25 @@ def actualizar_jugador(db: Session, id_jugador, fecha):
         return False
 
 
-def actualizar_partida(db: Session, partida: schemas.EstadoPartida):
+def actualizar_partida(db: Session, id_jugador, id_partida, partida: schemas.EstadoPartida):
     """ Función que actualiza el estado de la partida """
     # Actualizo la fecha y hora de la última partida del jugador
-    fecha = datetime.datetime.utcnow
-    db.query(models.Partida).filter(models.Partida.id_partida == partida.id_partida).update(
-        {
-            "estado": partida.estado,
-            "turno": tools.nuevo_turno(turno_actual=models.Partida.turno),
-            "juega": partida.juega,
-            "victoria": partida.victoria,
-            "ficha_jugador_1": partida.juega,
-            "ficha_jugador_2": partida.juega,
-            "tablero": partida.tablero,
-            "fecha_ultima_actualizacion": fecha,
-        }
-    )
-    # Guardo los datos
-    db.commit()
-    partida_actualizada = buscar_partida(db, id_partida=partida.id_partida)
-    # Compruebo que se han guardado los cambios
-    if partida_actualizada.fecha_ultima_actualizacion == fecha:
-        return db_partida
-    else:
-        return False
+    fecha = datetime.now()
+    if actualizar_jugador(db=db, id_jugador=id_jugador, fecha=fecha):
+        db.query(models.Partida).filter(models.Partida.id_partida == id_partida).update(
+            {
+                "estado": partida.estado,
+                "turno": tools.nuevo_turno(turno_actual=partida.turno),
+                "juega": partida.juega,
+                "victoria": partida.victoria,
+                "ficha_jugador_1": partida.ficha_jugador_1,
+                "capturas_jugador_1": partida.capturas_jugador_1,
+                "ficha_jugador_2": partida.ficha_jugador_2,
+                "capturas_jugador_2": partida.capturas_jugador_2,
+                "tablero": partida.tablero,
+                "fecha_ultima_actualizacion": fecha,
+            }
+        )
+        # Guardo los datos
+        db.commit()
+    return buscar_partida(db=db, id_partida=id_partida)
