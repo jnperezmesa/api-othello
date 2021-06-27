@@ -106,10 +106,6 @@ def actualizar_partida(db: Session, id_jugador, id_partida, partida: schemas.Est
                 "turno": tools.nuevo_turno(turno_actual=partida.turno),
                 "juega": partida.juega,
                 "victoria": partida.victoria,
-                "ficha_jugador_1": partida.ficha_jugador_1,
-                "capturas_jugador_1": partida.capturas_jugador_1,
-                "ficha_jugador_2": partida.ficha_jugador_2,
-                "capturas_jugador_2": partida.capturas_jugador_2,
                 "tablero": partida.tablero,
                 "fecha_ultima_actualizacion": fecha,
             }

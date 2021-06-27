@@ -35,6 +35,8 @@ pip3 install sqlalchemy
 4. Instalamos el servidor.
 ```` 
 pip3 install uvicorn
+
+pip3 install uvicorn[standard]
  ````
 
 5. Iniciamos el servidor

@@ -1,7 +1,9 @@
+# Minimo fast api
 from typing import List
-
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
+# Para configurar los cors
+from fastapi.middleware.cors import CORSMiddleware
 
 from . import crud, models, schemas, options
 from .database import SessionLocal, engine
@@ -12,6 +14,18 @@ models.Base.metadata.create_all(bind=engine)
 """ FAST API """
 app = FastAPI()
 
+""" CORS """
+origins = [
+    "*",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 """ BASE DE DATOS """
 def get_db():
@@ -44,10 +58,6 @@ def ver_partida(id_partida, db: Session = Depends(get_db)):
                 turno=partida.turno,
                 juega=partida.juega,
                 victoria=partida.victoria,
-                ficha_jugador_1=partida.ficha_jugador_1,
-                capturas_jugador_1=partida.capturas_jugador_1,
-                ficha_jugador_2=partida.ficha_jugador_2,
-                capturas_jugador_2=partida.capturas_jugador_2,
                 tablero=partida.tablero,
                 fecha_ultima_actualizacion=partida.fecha_ultima_actualizacion,
             )
@@ -84,6 +94,7 @@ def crear_partida(id_jugador, tipo_de_partida, db: Session = Depends(get_db)):
         # Cargamos la respuesta
         respuesta = schemas.Partida(
             id_partida=nueva.id_partida,
+            fecha_ultima_actualizacion=nueva.fecha_ultima_actualizacion,
         )
         return respuesta
     else:
@@ -112,10 +123,6 @@ def unirse_a_partida(id_partida, id_jugador, db: Session = Depends(get_db)):
                 turno=partida_actualizada.turno,
                 juega=partida_actualizada.juega,
                 victoria=partida_actualizada.victoria,
-                ficha_jugador_1=partida_actualizada.ficha_jugador_1,
-                capturas_jugador_1=partida_actualizada.capturas_jugador_1,
-                ficha_jugador_2=partida_actualizada.ficha_jugador_2,
-                capturas_jugador_2=partida_actualizada.capturas_jugador_2,
                 tablero=partida_actualizada.tablero,
                 fecha_ultima_actualizacion=partida_actualizada.fecha_ultima_actualizacion,
             )
@@ -147,10 +154,6 @@ def jugar_turno(id_partida, id_jugador, movimiento: schemas.EstadoPartida, db: S
                     turno=partida_actualizada.turno,
                     juega=partida_actualizada.juega,
                     victoria=partida_actualizada.victoria,
-                    ficha_jugador_1=partida_actualizada.ficha_jugador_1,
-                    capturas_jugador_1=partida_actualizada.capturas_jugador_1,
-                    ficha_jugador_2=partida_actualizada.ficha_jugador_2,
-                    capturas_jugador_2=partida_actualizada.capturas_jugador_2,
                     tablero=partida_actualizada.tablero,
                     fecha_ultima_actualizacion=partida_actualizada.fecha_ultima_actualizacion,
                 )

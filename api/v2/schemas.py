@@ -13,6 +13,7 @@ class Jugador(BaseModel):
 class Partida(BaseModel):
     """ Dato que recibiremos cuando solicitemos crear una partida """
     id_partida: str
+    fecha_ultima_actualizacion: Optional[str] = None
 
 
 class EstadoPartida(BaseModel):
@@ -21,10 +22,6 @@ class EstadoPartida(BaseModel):
     turno: int
     juega: int
     victoria: Optional[int] = None
-    ficha_jugador_1: int
-    capturas_jugador_1: int
-    ficha_jugador_2: int
-    capturas_jugador_2: int
     tablero: Optional[str] = None
     fecha_ultima_actualizacion: Optional[str] = None
 

@@ -2,8 +2,8 @@ from enum import Enum
 
 class Estado(int, Enum):
     """ Estado de la partida """
-    espera = 1
-    activa = 2
+    activa = 1
+    espera = 2
     cerrada = 3
 
 
