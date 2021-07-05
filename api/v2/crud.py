@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from . import models, schemas, tools, options
+from . import models, schemas, tools, options, game
 from datetime import datetime
 
 
@@ -38,7 +38,7 @@ def registrar_partida(db: Session, datos: schemas.CrearPartida):
         id_partida=id,
         id_jugador_1=datos.id_jugador,
         tipo_de_partida=datos.tipo_de_partida,
-        tablero="[[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,1,2,0,0,0],[0,0,0,2,1,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0]]"
+        tablero=game.tablero_default,
     )
     # Si la partida no es online, cargo el jugador 2 y paso a activa
     if datos.tipo_de_partida == options.Tipo.local or datos.tipo_de_partida == options.Tipo.boot:

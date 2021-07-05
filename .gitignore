@@ -1195,3 +1195,5 @@ api/venv/bin/dotenv
 api/othello.sqlite
 api/othello.sqlite
 api/othello.sqlite
+api/othello.sqlite
+api/test.othello.sqlite

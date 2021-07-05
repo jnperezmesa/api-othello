@@ -29,7 +29,7 @@ class Partida(Base):
     turno = Column(Integer, default=0)
     juega = Column(Integer, default=options.Juega.negras)
 
-    victoria = Column(Integer, default=3)
+    victoria = Column(Integer, default=0)
 
     id_jugador_1 = Column(String, default=None)
     id_jugador_2 = Column(String, default=None)

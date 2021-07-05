@@ -160,7 +160,15 @@ def jugar_turno(id_partida, id_jugador, movimiento: schemas.EstadoPartida, db: S
                 return respuesta
             # Si no está activa le entrego la partida acabada
             else:
-                return partida
+                sin_cambios = schemas.EstadoPartida(
+                    estado=partida.estado,
+                    turno=partida.turno,
+                    juega=partida.juega,
+                    victoria=partida.victoria,
+                    tablero=partida.tablero,
+                    fecha_ultima_actualizacion=partida.fecha_ultima_actualizacion,
+                )
+                return sin_cambios
         elif crud.buscar_jugador(db=db, id_jugador=id_jugador):
             raise HTTPException(status_code=403, detail="No juegas en esta partida")
         else:
