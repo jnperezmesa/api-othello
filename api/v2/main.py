@@ -27,20 +27,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-""" BASE DE DATOS """
+# BASE DE DATOS
 def get_db():
+    """Función que conecta la base de datos"""
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
 
-""" CONSTANTES """
+# CONSTANTES
 URL_BASE_JUGADOR = "/api/v2/jugador/"
 URL_BASE_PARTIDA = "/api/v2/partida/"
 
 
-""" ENDPOINTS """
+# ENDPOINTS
 @app.get(str(f"{URL_BASE_PARTIDA}" + "{id_partida}"), response_model=schemas.EstadoPartida)
 def ver_partida(id_partida, db: Session = Depends(get_db)):
     """ Comprobar el estado de la partida o ver como espectador """

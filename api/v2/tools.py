@@ -2,7 +2,7 @@ import string, random
 from sqlalchemy import update
 
 
-def generar_id(caracteres=4):
+def generar_id(caracteres=14):
     """ Función que genera un alfanumérico aleatorio """
     # Array para almacenar los caracteres
     id_array = []
