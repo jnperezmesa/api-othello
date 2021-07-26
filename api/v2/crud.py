@@ -3,10 +3,28 @@ from . import models, schemas, tools, options, game
 from datetime import datetime
 
 
+
 def buscar_jugador(db: Session, id_jugador):
     """ Función que busca a un jugador por su id """
     # Filtramos la base de datos en busca de una coincidencia
-    return db.query(models.Jugador).filter(models.Jugador.id_jugador == id_jugador).first()
+    existe = db.query(models.Jugador).filter(models.Jugador.id_jugador == id_jugador).first()
+    # Si existe lo entrego
+    if existe:
+        return existe
+    # Si no existe lo analizo
+    else:
+        # Si cumple con el numer ode caracteres
+        if tools.verificar_id(id_jugador=id_jugador):
+            # Guardo los datos del jugador
+            db_jugador = models.Jugador(
+                id_jugador=id_jugador,
+            )
+            # Agrego la ficha del jugador a la base de datos
+            jugador = tools.guardar_datos(db=db, registro=db_jugador)
+            # Devuelvo el id del jugador
+            return jugador
+        else:
+            return False
 
 
 def buscar_partida(db: Session, id_partida):
@@ -18,7 +36,7 @@ def buscar_partida(db: Session, id_partida):
 def registrar_jugador(db: Session):
     """ Función que registra a un jugador """
     # Creo el id del jugador
-    id_jugador = tools.generar_id(caracteres=14)
+    id_jugador = tools.generar_id()
     # Relleno la ficha del jugador
     db_jugador = models.Jugador(
         id_jugador=id_jugador,

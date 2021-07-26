@@ -32,8 +32,12 @@ class Partida(Base):
     victoria = Column(Integer, default=0)
 
     id_jugador_1 = Column(String, default=None)
+    contador_jugador_1 = Column(Integer, default=2)
     id_jugador_2 = Column(String, default=None)
+    contador_jugador_2 = Column(Integer, default=2)
 
     fecha_creacion = Column(String, default=str(datetime.now()))
     fecha_ultima_actualizacion = Column(String, default=str(datetime.now()))
+
+    nueva_partida = Column(String, default=None)
 

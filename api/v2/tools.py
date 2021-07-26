@@ -1,6 +1,6 @@
 import string, random
 from sqlalchemy import update
-
+import re
 
 def generar_id(caracteres=14):
     """ Función que genera un alfanumérico aleatorio """
@@ -19,7 +19,7 @@ def generar_id(caracteres=14):
             # Letra aleatoria
             caracter_aleatorio = random.choice(string.ascii_letters)
         # Agrego el nuevo carácter
-        id_array.append(caracter_aleatorio.upper())
+        id_array.append(caracter_aleatorio)
     # Se pasa a string
     id = str(''.join(id_array))
     return id
@@ -41,3 +41,7 @@ def guardar_datos(db, registro):
     db.refresh(registro)
     # Devuelvo el registro que se ha guardado
     return registro
+
+def verificar_id(id_jugador):
+    patron = re.compile('^[A-Za-z0-9]{14}$')
+    return patron.match(id_jugador)
