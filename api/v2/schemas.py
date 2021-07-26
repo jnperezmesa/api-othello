@@ -5,6 +5,9 @@ from . import options
 
 """ Modelos para ver """
 
+class Pong(BaseModel):
+    response: str = "pong"
+
 class Jugador(BaseModel):
     """ Dato que recibiremos cuando solicitemos crear un nuevo jugador """
     id_jugador: str

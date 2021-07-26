@@ -9,8 +9,8 @@ class Estado(int, Enum):
 
 class Juega(int, Enum):
     """ Fichas de juego """
-    negras = 2
-    blancas = 1
+    negras = 1
+    blancas = 2
 
 
 class Tipo(int, Enum):
