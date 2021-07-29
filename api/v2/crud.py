@@ -126,6 +126,8 @@ def actualizar_partida(db: Session, id_jugador, id_partida, partida: schemas.Est
                 "juega": partida.juega,
                 "victoria": partida.victoria,
                 "tablero": partida.tablero,
+                "contador_jugador_1": partida.contador_jugador_1,
+                "contador_jugador_2": partida.contador_jugador_2,
                 "fecha_ultima_actualizacion": fecha,
             }
         )

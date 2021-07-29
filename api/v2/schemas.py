@@ -26,6 +26,8 @@ class EstadoPartida(BaseModel):
     juega: int
     victoria: Optional[int] = None
     tablero: Optional[str] = None
+    contador_jugador_1: int = 2
+    contador_jugador_2: int = 2
     fecha_ultima_actualizacion: Optional[str] = None
 
 

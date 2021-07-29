@@ -165,6 +165,8 @@ def jugar_turno(id_partida, id_jugador, movimiento: schemas.EstadoPartida, db: S
                     juega=partida_actualizada.juega,
                     victoria=partida_actualizada.victoria,
                     tablero=partida_actualizada.tablero,
+                    contador_jugador_1=partida_actualizada.contador_jugador_1,
+                    contador_jugador_2=partida_actualizada.contador_jugador_2,
                     fecha_ultima_actualizacion=partida_actualizada.fecha_ultima_actualizacion,
                 )
                 return respuesta
@@ -176,6 +178,8 @@ def jugar_turno(id_partida, id_jugador, movimiento: schemas.EstadoPartida, db: S
                     juega=partida.juega,
                     victoria=partida.victoria,
                     tablero=partida.tablero,
+                    contador_jugador_1=partida.contador_jugador_1,
+                    contador_jugador_2=partida.contador_jugador_2,
                     fecha_ultima_actualizacion=partida.fecha_ultima_actualizacion,
                 )
                 return sin_cambios
