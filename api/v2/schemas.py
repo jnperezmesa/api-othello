@@ -31,6 +31,21 @@ class EstadoPartida(BaseModel):
     fecha_ultima_actualizacion: Optional[str] = None
 
 
+class EstadoPartidaRevancha(BaseModel):
+    """ Datos que recibimos cuando pedimos ver una partida o cuando efecutamos un cambio a raiz de un cambio de turno """
+    id_partida: str
+    estado: int
+    turno: int
+    juega: int
+    victoria: Optional[int] = None
+    tablero: Optional[str] = None
+    id_jugador_1: str = None
+    id_jugador_2: str = None
+    contador_jugador_1: int = 2
+    contador_jugador_2: int = 2
+    fecha_ultima_actualizacion: Optional[str] = None
+
+
 """ Modelos para modificar """
 
 class CrearPartida(BaseModel):

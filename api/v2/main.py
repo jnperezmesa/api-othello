@@ -191,7 +191,7 @@ def jugar_turno(id_partida, id_jugador, movimiento: schemas.EstadoPartida, db: S
         raise HTTPException(status_code=404, detail="Te has equivocado de codigo")
 
 
-@app.put(str(f"{URL_BASE_PARTIDA}revancha/" + "{id_partida}/{id_jugador}/"), response_model=schemas.Partida, status_code=201)
+@app.put(str(f"{URL_BASE_PARTIDA}revancha/" + "{id_partida}/{id_jugador}/"), response_model=schemas.EstadoPartidaRevancha, status_code=201)
 def jugar_revancha(id_partida, id_jugador, db: Session = Depends(get_db)):
     # Busca la partida antigua
     partida = crud.buscar_partida(db, id_partida)
@@ -203,13 +203,22 @@ def jugar_revancha(id_partida, id_jugador, db: Session = Depends(get_db)):
                 # Preparamos los datos
                 crear = schemas.CrearPartida(
                     id_jugador=id_jugador,
-                    tipo_de_partida=tipo_de_partida
+                    tipo_de_partida=options.Tipo.online
                 )
                 # Registramos la partida
                 nueva = crud.registrar_partida_revancha(db=db, datos=crear, partida_antigua=partida)
                 # Cargamos la respuesta
-                respuesta = schemas.Partida(
+                respuesta = schemas.EstadoPartidaRevancha(
                     id_partida=nueva.id_partida,
+                    estado=nueva.estado,
+                    turno=nueva.turno,
+                    juega=nueva.juega,
+                    victoria=nueva.victoria,
+                    tablero=nueva.tablero,
+                    id_jugador_1=nueva.id_jugador_1,
+                    id_jugador_2=nueva.id_jugador_2,
+                    contador_jugador_1=nueva.contador_jugador_1,
+                    contador_jugador_2=nueva.contador_jugador_2,
                     fecha_ultima_actualizacion=nueva.fecha_ultima_actualizacion,
                 )
                 return respuesta
@@ -225,8 +234,17 @@ def jugar_revancha(id_partida, id_jugador, db: Session = Depends(get_db)):
                 # Guardo al jugador nuevo
                 crud.registrar_jugador_2(db=db, datos=datos)
                 # La entrego
-                respuesta = schemas.Partida(
+                respuesta = schemas.EstadoPartidaRevancha(
                     id_partida=nueva.id_partida,
+                    estado=nueva.estado,
+                    turno=nueva.turno,
+                    juega=nueva.juega,
+                    victoria=nueva.victoria,
+                    tablero=nueva.tablero,
+                    id_jugador_1=nueva.id_jugador_1,
+                    id_jugador_2=nueva.id_jugador_2,
+                    contador_jugador_1=nueva.contador_jugador_1,
+                    contador_jugador_2=nueva.contador_jugador_2,
                     fecha_ultima_actualizacion=nueva.fecha_ultima_actualizacion,
                 )
                 return respuesta

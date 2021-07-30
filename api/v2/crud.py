@@ -96,6 +96,14 @@ def registrar_partida_revancha(db: Session, datos: schemas.CrearPartida, partida
         db_partida.estado = options.Estado.activa
     # Guardo los cambios
     partida = tools.guardar_datos(db=db, registro=db_partida)
+    # Actualizo la antigua
+    db.query(models.Partida).filter(models.Partida.id_partida == partida_antigua.id_partida).update(
+        {
+            "nueva_partida": partida.id_partida,
+        }
+    )
+    # Guardo los datos
+    db.commit()
     # devuelvo el resultado
     return partida
 
