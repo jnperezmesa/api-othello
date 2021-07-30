@@ -73,6 +73,32 @@ def registrar_partida(db: Session, datos: schemas.CrearPartida):
     # devuelvo el resultado
     return partida
 
+def registrar_partida_revancha(db: Session, datos: schemas.CrearPartida, partida_antigua):
+    """ Función que registra una partida """
+    # Creo el id de la partida
+    id = tools.generar_id()
+    # Relleno la ficha de la partida
+    db_partida = models.Partida(
+        id_partida=id,
+        id_jugador_1=partida_antigua.id_jugador_2,
+        tipo_de_partida=datos.tipo_de_partida,
+        tablero=game.tablero_default,
+    )
+    # Si la partida no es online, cargo el jugador 2 y paso a activa
+    if datos.tipo_de_partida == options.Tipo.local or datos.tipo_de_partida == options.Tipo.boot:
+        # Agrego que es jugador local
+        if datos.tipo_de_partida == options.Tipo.local:
+            db_partida.id_jugador_2 = 'local'
+        # Agrego que es jugador boot
+        elif datos.tipo_de_partida == options.Tipo.boot:
+            db_partida.id_jugador_2 = 'boot'
+        # Cambio el estado de la partida
+        db_partida.estado = options.Estado.activa
+    # Guardo los cambios
+    partida = tools.guardar_datos(db=db, registro=db_partida)
+    # devuelvo el resultado
+    return partida
+
 
 def registrar_jugador_2(db: Session, datos: schemas.UnirseAPartida):
     """ Función que agrega al jugador 2 a la partida"""
@@ -81,13 +107,24 @@ def registrar_jugador_2(db: Session, datos: schemas.UnirseAPartida):
     # Actualizo la fecha de ultima partida del jugador y autorizo el paso a actualizar la partida
     if actualizar_jugador(db=db, id_jugador=datos.id_jugador, fecha=fecha):
         # Filtro y modifico
-        db.query(models.Partida).filter(models.Partida.id_partida == datos.id_partida).update(
-            {
-                "id_jugador_2": datos.id_jugador,
-                "estado": options.Estado.activa,
-                "fecha_ultima_actualizacion": fecha,
-            }
-        )
+        partida = buscar_partida(db=db, id_partida=datos.id_partida)
+        # Compruebo si es una partida de revancha
+        if not partida.id_jugador_1:
+            db.query(models.Partida).filter(models.Partida.id_partida == datos.id_partida).update(
+                {
+                    "id_jugador_1": datos.id_jugador,
+                    "estado": options.Estado.activa,
+                    "fecha_ultima_actualizacion": fecha,
+                }
+            )
+        else:
+            db.query(models.Partida).filter(models.Partida.id_partida == datos.id_partida).update(
+                {
+                    "id_jugador_2": datos.id_jugador,
+                    "estado": options.Estado.activa,
+                    "fecha_ultima_actualizacion": fecha,
+                }
+            )
         # Guardo los datos
         db.commit()
     # Entrego los datos de la partida actualizados

@@ -189,3 +189,48 @@ def jugar_turno(id_partida, id_jugador, movimiento: schemas.EstadoPartida, db: S
             raise HTTPException(status_code=404, detail="No estás registrado")
     else:
         raise HTTPException(status_code=404, detail="Te has equivocado de codigo")
+
+
+@app.put(str(f"{URL_BASE_PARTIDA}revancha/" + "{id_partida}/{id_jugador}/"), response_model=schemas.Partida, status_code=201)
+def jugar_revancha(id_partida, id_jugador, db: Session = Depends(get_db)):
+    # Busca la partida antigua
+    partida = crud.buscar_partida(db, id_partida)
+    if partida:
+        # Compruebo que el jugador existe en mi base de datos
+        if crud.buscar_jugador(db=db, id_jugador=id_jugador):
+            # Si no existe id de la nueva partida lo creo
+            if not partida.nueva_partida:
+                # Preparamos los datos
+                crear = schemas.CrearPartida(
+                    id_jugador=id_jugador,
+                    tipo_de_partida=tipo_de_partida
+                )
+                # Registramos la partida
+                nueva = crud.registrar_partida_revancha(db=db, datos=crear, partida_antigua=partida)
+                # Cargamos la respuesta
+                respuesta = schemas.Partida(
+                    id_partida=nueva.id_partida,
+                    fecha_ultima_actualizacion=nueva.fecha_ultima_actualizacion,
+                )
+                return respuesta
+            # Si existe id de la nueva partida lo entrego
+            else:
+                # Busco la partida
+                nueva = crud.buscar_partida(db, partida.nueva_partida)
+                # Preparo los datos
+                datos = schemas.UnirseAPartida(
+                    id_partida=nueva.id_partida,
+                    id_jugador=id_jugador,
+                )
+                # Guardo al jugador nuevo
+                crud.registrar_jugador_2(db=db, datos=datos)
+                # La entrego
+                respuesta = schemas.Partida(
+                    id_partida=nueva.id_partida,
+                    fecha_ultima_actualizacion=nueva.fecha_ultima_actualizacion,
+                )
+                return respuesta
+        else:
+            raise HTTPException(status_code=404, detail="No estás registrado")
+    else:
+        raise HTTPException(status_code=404, detail="Te has equivocado de codigo")
