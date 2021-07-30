@@ -28,6 +28,7 @@ class EstadoPartida(BaseModel):
     tablero: Optional[str] = None
     contador_jugador_1: int = 2
     contador_jugador_2: int = 2
+    nueva_partida: str = None
     fecha_ultima_actualizacion: Optional[str] = None
 
 

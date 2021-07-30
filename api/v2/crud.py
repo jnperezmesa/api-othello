@@ -77,11 +77,14 @@ def registrar_partida_revancha(db: Session, datos: schemas.CrearPartida, partida
     """ Función que registra una partida """
     # Creo el id de la partida
     id = tools.generar_id()
+    # Creo un marcador de fecha
+    fecha = datetime.now()
     # Relleno la ficha de la partida
     db_partida = models.Partida(
         id_partida=id,
         id_jugador_1=partida_antigua.id_jugador_2,
         tipo_de_partida=datos.tipo_de_partida,
+        estado=options.Estado.espera,
         tablero=game.tablero_default,
     )
     # Si la partida no es online, cargo el jugador 2 y paso a activa
@@ -100,6 +103,7 @@ def registrar_partida_revancha(db: Session, datos: schemas.CrearPartida, partida
     db.query(models.Partida).filter(models.Partida.id_partida == partida_antigua.id_partida).update(
         {
             "nueva_partida": partida.id_partida,
+            "fecha_ultima_actualizacion": fecha,
         }
     )
     # Guardo los datos

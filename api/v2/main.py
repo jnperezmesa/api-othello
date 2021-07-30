@@ -66,6 +66,7 @@ def ver_partida(id_partida, db: Session = Depends(get_db)):
                 juega=partida.juega,
                 victoria=partida.victoria,
                 tablero=partida.tablero,
+                nueva_partida=partida.nueva_partida,
                 fecha_ultima_actualizacion=partida.fecha_ultima_actualizacion,
             )
             # Entregamos la respuesta
