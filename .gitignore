@@ -1,4 +1,4 @@
 
 api/venv/*
-api/othello.sqlite*
+api/othello.sqlite
 api/v2/__pycache__/*
