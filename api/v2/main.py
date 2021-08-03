@@ -42,6 +42,11 @@ URL_BASE_JUGADOR = f"{URL_BASE}jugador/"
 URL_BASE_PARTIDA = f"{URL_BASE}partida/"
 
 
+@app.get("/")
+def funciones():
+    return schemas.Pong(response="¡Hola Mundo!")
+
+
 @app.get(f"{URL_BASE}ping/")
 def ping():
     return schemas.Pong()
