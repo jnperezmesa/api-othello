@@ -37,14 +37,14 @@ def get_db():
         db.close()
 
 # CONSTANTES
-URL_BASE = "/api/v2/"
+URL_BASE = "/v2/"
 URL_BASE_JUGADOR = f"{URL_BASE}jugador/"
 URL_BASE_PARTIDA = f"{URL_BASE}partida/"
 
 
 @app.get("/")
-def funciones():
-    return schemas.Pong(response="¡Hola Mundo!")
+def hola_mundo():
+    return schemas.Pong(response="¡Hola Mundo!, soy el guardian de las partidas de othello.")
 
 
 @app.get(f"{URL_BASE}ping/")
