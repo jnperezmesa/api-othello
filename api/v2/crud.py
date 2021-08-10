@@ -73,6 +73,7 @@ def registrar_partida(db: Session, datos: schemas.CrearPartida):
     # devuelvo el resultado
     return partida
 
+
 def registrar_partida_revancha(db: Session, datos: schemas.CrearPartida, partida_antigua):
     """ Función que registra una partida """
     # Creo el id de la partida
@@ -82,21 +83,15 @@ def registrar_partida_revancha(db: Session, datos: schemas.CrearPartida, partida
     # Relleno la ficha de la partida
     db_partida = models.Partida(
         id_partida=id,
-        id_jugador_1=partida_antigua.id_jugador_2,
-        tipo_de_partida=datos.tipo_de_partida,
+        tipo_de_partida=datos.id_jugador,
         estado=options.Estado.espera,
         tablero=game.tablero_default,
     )
-    # Si la partida no es online, cargo el jugador 2 y paso a activa
-    if datos.tipo_de_partida == options.Tipo.local or datos.tipo_de_partida == options.Tipo.boot:
-        # Agrego que es jugador local
-        if datos.tipo_de_partida == options.Tipo.local:
-            db_partida.id_jugador_2 = 'local'
-        # Agrego que es jugador boot
-        elif datos.tipo_de_partida == options.Tipo.boot:
-            db_partida.id_jugador_2 = 'boot'
-        # Cambio el estado de la partida
-        db_partida.estado = options.Estado.activa
+    # Compruebo que jugador era en la partida anterior
+    if partida_antigua.id_jugador_1 == datos.id_jugador:
+        db_partida.id_jugador_2 = id_jugador
+    if partida_antigua.id_jugador_2 == datos.id_jugador:
+        db_partida.id_jugador_1 = id_jugador
     # Guardo los cambios
     partida = tools.guardar_datos(db=db, registro=db_partida)
     # Actualizo la antigua
