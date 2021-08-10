@@ -89,9 +89,9 @@ def registrar_partida_revancha(db: Session, datos: schemas.CrearPartida, partida
     )
     # Compruebo que jugador era en la partida anterior
     if partida_antigua.id_jugador_1 == datos.id_jugador:
-        db_partida.id_jugador_2 = id_jugador
+        db_partida.id_jugador_2 = datos.id_jugador
     if partida_antigua.id_jugador_2 == datos.id_jugador:
-        db_partida.id_jugador_1 = id_jugador
+        db_partida.id_jugador_1 = datos.id_jugador
     # Guardo los cambios
     partida = tools.guardar_datos(db=db, registro=db_partida)
     # Actualizo la antigua
